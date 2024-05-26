@@ -55,19 +55,15 @@ if (!requireNamespace("rnaturalearthhires", quietly = TRUE)) {
 }
 library(rnaturalearthhires)
 
-# Register your Google Maps API key (replace 'YOUR_GOOGLE_MAPS_API_KEY' with your actual key)
 register_google(key = "AIzaSyDMvKs3ukBbGm291s1rFBbAEaPIEgXBYrc")
 
-# Load your dataset (replace 'your_file.csv' with your actual file)
+
 data <- read_delim("zastupnici.csv", delim = ";", show_col_types = FALSE)
 
-# Extract unique cities from the "Geografsko_podrijetlo" column
 cities <- unique(data$'Geografsko podrijetlo')
 
-# Initialize a data frame to store the geocoded results
 geocoded_data <- data.frame(city = character(), lon = numeric(), lat = numeric(), stringsAsFactors = FALSE)
 
-# Geocode each city
 for (city in cities) {
   result <- geocode(city, output = "latlon", source = "google")
   if (!is.na(result$lon) & !is.na(result$lat)) {
@@ -75,17 +71,15 @@ for (city in cities) {
   }
 }
 
-# Save the geocoded data to a CSV file (optional)
+
 write_csv(geocoded_data, "geocoded_cities.csv")
 
-# Load a map of Croatia using the rnaturalearth package
+
 croatia <- ne_countries(scale = "medium", returnclass = "sf") %>%
   filter(name == "Croatia")
 
-# Merge the geocoded cities with the Croatia map data
 croatia_with_cities <- left_join(croatia, geocoded_data, by = character())
 
-# Plot the map with cities
 ggplot() +
   geom_sf(data = croatia_with_cities, fill = "lightblue", color = "black", size = 0.5) +
   geom_point(data = geocoded_data, aes(x = lon, y = lat), color = "red", size = 3) +
